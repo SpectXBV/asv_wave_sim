@@ -92,6 +92,23 @@ class WaveParametersPrivate
   /// \brief The horizontal wind velocity [m/s].
   gz::math::Vector2d wind_velocity_ = gz::math::Vector2d(5.0, 0.0);
 
+  /// \brief Significant wave height for the 'jonswap_fft' algorithm [m].
+  double hs_{2.0};
+
+  /// \brief Peak period for the 'jonswap_fft' algorithm [s].
+  double tp_{8.0};
+
+  /// \brief JONSWAP peak-enhancement factor for the 'jonswap_fft' algorithm.
+  double gamma_{3.3};
+
+  /// \brief Dominant wave direction for the 'jonswap_fft' algorithm
+  ///        [deg], independent of wind direction.
+  double wave_direction_deg_{0.0};
+
+  /// \brief Cosine-2S directional spreading parameter for the
+  ///        'jonswap_fft' algorithm.
+  double direction_spread_{5.0};
+
   /// \brief The mean wave angular frequency (derived).
   double angular_frequency_{2.0*M_PI};
 
@@ -387,6 +404,19 @@ void WaveParameters::SetFromSDF(sdf::Element& sdf)
     wind_angle_rad = M_PI / 180.0 * wind_angle_deg;
     SetWindSpeedAndAngle(wind_speed, wind_angle_rad);
   }
+
+  // parameters for the 'jonswap_fft' algorithm - independent of wind,
+  // only consumed when algorithm == "jonswap_fft".
+  impl_->hs_                = Utilities::SdfParamDouble(
+      sdf,    "hs",                 impl_->hs_);
+  impl_->tp_                = Utilities::SdfParamDouble(
+      sdf,    "tp",                 impl_->tp_);
+  impl_->gamma_             = Utilities::SdfParamDouble(
+      sdf,    "gamma",              impl_->gamma_);
+  impl_->wave_direction_deg_ = Utilities::SdfParamDouble(
+      sdf,    "wave_direction_deg", impl_->wave_direction_deg_);
+  impl_->direction_spread_  = Utilities::SdfParamDouble(
+      sdf,    "direction_spread",   impl_->direction_spread_);
 }
 
 //////////////////////////////////////////////////
@@ -498,6 +528,36 @@ double WaveParameters::WindAngleRad() const
 }
 
 //////////////////////////////////////////////////
+double WaveParameters::Hs() const
+{
+  return impl_->hs_;
+}
+
+//////////////////////////////////////////////////
+double WaveParameters::Tp() const
+{
+  return impl_->tp_;
+}
+
+//////////////////////////////////////////////////
+double WaveParameters::Gamma() const
+{
+  return impl_->gamma_;
+}
+
+//////////////////////////////////////////////////
+double WaveParameters::WaveDirectionDeg() const
+{
+  return impl_->wave_direction_deg_;
+}
+
+//////////////////////////////////////////////////
+double WaveParameters::DirectionalSpread() const
+{
+  return impl_->direction_spread_;
+}
+
+//////////////////////////////////////////////////
 void WaveParameters::SetAlgorithm(const std::string& value)
 {
   impl_->algorithm_ = value;
@@ -604,6 +664,36 @@ void WaveParameters::SetWindSpeedAndAngle(
   impl_->wind_velocity_.X() = ux;
   impl_->wind_velocity_.Y() = uy;
   impl_->Recalculate();
+}
+
+//////////////////////////////////////////////////
+void WaveParameters::SetHs(double value)
+{
+  impl_->hs_ = value;
+}
+
+//////////////////////////////////////////////////
+void WaveParameters::SetTp(double value)
+{
+  impl_->tp_ = value;
+}
+
+//////////////////////////////////////////////////
+void WaveParameters::SetGamma(double value)
+{
+  impl_->gamma_ = value;
+}
+
+//////////////////////////////////////////////////
+void WaveParameters::SetWaveDirectionDeg(double value)
+{
+  impl_->wave_direction_deg_ = value;
+}
+
+//////////////////////////////////////////////////
+void WaveParameters::SetDirectionalSpread(double value)
+{
+  impl_->direction_spread_ = value;
 }
 
 //////////////////////////////////////////////////

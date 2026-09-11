@@ -623,6 +623,15 @@ void WavesVisualPrivate::OnUpdate()
         this->oceanTile.reset(new waves::visual::OceanTile(this->waveParams));
         this->oceanTile->SetWindVelocity(ux, uy);
 
+        // 'jonswap_fft' algorithm parameters - no-ops for other algorithms.
+        this->oceanTile->SetHs(this->waveParams->Hs());
+        this->oceanTile->SetTp(this->waveParams->Tp());
+        this->oceanTile->SetGamma(this->waveParams->Gamma());
+        this->oceanTile->SetWaveDirectionDeg(
+            this->waveParams->WaveDirectionDeg());
+        this->oceanTile->SetDirectionalSpread(
+            this->waveParams->DirectionalSpread());
+
         // create mesh - do not store in MeshManager as it will be modified
         this->oceanTileMesh.reset(this->oceanTile->CreateMesh());
 

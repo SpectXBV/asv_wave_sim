@@ -120,6 +120,24 @@ class WaveParameters
   ///        positive x-axis) (rad).
   double WindAngleRad() const;
 
+  /// \brief Significant wave height for the 'jonswap_fft' algorithm (m).
+  double Hs() const;
+
+  /// \brief Peak period for the 'jonswap_fft' algorithm (s).
+  double Tp() const;
+
+  /// \brief JONSWAP peak-enhancement factor for the 'jonswap_fft' algorithm.
+  double Gamma() const;
+
+  /// \brief Dominant wave direction for the 'jonswap_fft' algorithm
+  ///        (degrees, counter clockwise from positive x-axis).
+  ///        Independent of wind direction.
+  double WaveDirectionDeg() const;
+
+  /// \brief Cosine-2S directional spreading parameter for the
+  ///        'jonswap_fft' algorithm.
+  double DirectionalSpread() const;
+
   /// \brief Set the wave algorithm (options are: 'sinusoid',
   ///        'trochoid', 'fft').
   ///
@@ -205,6 +223,36 @@ class WaveParameters
   /// \param[in] wind_speed     The wind speed (m/s).
   /// \param[in] wind_angle_rad The downwind angle (rad).
   void SetWindSpeedAndAngle(double wind_speed, double wind_angle_rad);
+
+  /// \brief Set the significant wave height for the 'jonswap_fft'
+  ///        algorithm (m).
+  ///
+  /// \param[in] value  The significant wave height (m).
+  void SetHs(double value);
+
+  /// \brief Set the peak period for the 'jonswap_fft' algorithm (s).
+  ///
+  /// \param[in] value  The peak period (s).
+  void SetTp(double value);
+
+  /// \brief Set the JONSWAP peak-enhancement factor for the
+  ///        'jonswap_fft' algorithm.
+  ///
+  /// \param[in] value  The peak-enhancement factor (standard JONSWAP: 3.3).
+  void SetGamma(double value);
+
+  /// \brief Set the dominant wave direction for the 'jonswap_fft'
+  ///        algorithm, independent of wind direction.
+  ///
+  /// \param[in] value  The direction (degrees, counter clockwise from
+  ///            positive x-axis).
+  void SetWaveDirectionDeg(double value);
+
+  /// \brief Set the cosine-2S directional spreading parameter for the
+  ///        'jonswap_fft' algorithm.
+  ///
+  /// \param[in] value  The spreading parameter.
+  void SetDirectionalSpread(double value);
 
   /// \brief Access the component angular frequencies (rad/s).
   const std::vector<double>& AngularFrequency_V() const;

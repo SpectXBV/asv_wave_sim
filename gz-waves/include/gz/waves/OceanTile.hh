@@ -55,6 +55,17 @@ class OceanTileT
 
   void SetSteepness(double value);
 
+  // 'jonswap_fft' algorithm parameters - no-ops for other algorithms.
+  void SetHs(double value);
+
+  void SetTp(double value);
+
+  void SetGamma(double value);
+
+  void SetWaveDirectionDeg(double value);
+
+  void SetDirectionalSpread(double value);
+
   void Create();
 
   // Returns a new gz::common::Mesh. The caller must take ownership.

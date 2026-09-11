@@ -1,0 +1,180 @@
+<?xml version='1.0' ?>
+<sdf version="1.6">
+  <model name="waves_jonswap">
+    <static>true</static>
+
+    <!--
+      GENERATED FILE - do not edit model.sdf directly, edit wave_params.env
+      and run ./generate_model_sdf.sh instead. That way the physics
+      (WavesModel) and visual (WavesVisual) wave blocks below are always
+      filled from the same single source of truth and can't drift apart.
+
+      Standalone sibling of the 'waves' model. That model uses the 'fft'
+      algorithm (ECKV spectrum, driven by wind speed). This model uses the
+      'jonswap_fft' algorithm: a JONSWAP spectrum parameterised directly by
+      significant wave height (hs), peak period (tp) and peak-enhancement
+      factor (gamma), spread around an independently settable dominant
+      wave direction (wave_direction_deg). This gives a repeatable, known
+      ground-truth sea state for generating and then validating
+      wave-parameter extraction from recorded data.
+    -->
+    <plugin
+        filename="gz-waves1-waves-model-system"
+        name="gz::sim::systems::WavesModel">
+      <static>0</static>
+      <update_rate>30</update_rate>
+      <wave>
+        <!-- `jonswap_fft` wave parameters -->
+        <algorithm>jonswap_fft</algorithm>
+        <tile_size>128</tile_size>
+        <cell_count>64</cell_count>
+        <hs>22.0</hs>
+        <tp>16.0</tp>
+        <gamma>3.3</gamma>
+        <wave_direction_deg>270</wave_direction_deg>
+        <direction_spread>5.0</direction_spread>
+        <steepness>2</steepness>
+      </wave>
+    </plugin>
+
+    <link name="base_link">
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>../waves/materials/mesh_L256m_N256.dae</uri>
+          </mesh>
+        </geometry>
+        <!--
+          Uncomment material if using DYNAMIC_GEOMETRY which uses PBS
+          rather than a custom shader
+        -->
+        <material>
+          <ambient>0.0 0.05 0.8 0.92</ambient>
+          <diffuse>0.0 0.1 0.7 0.92</diffuse>
+          <specular>0.7 0.7 0.7 0.92</specular>
+          <pbr>
+            <metal>
+              <albedo_map>../waves/materials/water.jpg</albedo_map>
+              <normal_map>../waves/materials/wave_normals.dds</normal_map>
+              <environment_map>../waves/materials/skybox_lowres.dds</environment_map>
+              <roughness>0.3</roughness>
+              <metalness>0.1</metalness>
+            </metal>
+          </pbr>
+        </material>
+
+        <!-- \todo remove duplicate params; populate from service instead -->
+        <plugin
+            filename="gz-waves1-waves-visual-system"
+            name="gz::sim::systems::WavesVisual">
+          <static>0</static>
+          <mesh_deformation_method>DYNAMIC_GEOMETRY</mesh_deformation_method>
+          <tiles_x>-0 0</tiles_x>
+          <tiles_y>-0 0</tiles_y>
+          <wave>
+            <!-- `jonswap_fft` wave parameters - kept in sync with the
+                 WavesModel block above by generate_model_sdf.sh -->
+            <algorithm>jonswap_fft</algorithm>
+            <tile_size>128</tile_size>
+            <cell_count>64</cell_count>
+            <hs>22.0</hs>
+            <tp>16.0</tp>
+            <gamma>3.3</gamma>
+            <wave_direction_deg>270</wave_direction_deg>
+            <direction_spread>5.0</direction_spread>
+            <steepness>2</steepness>
+          </wave>
+
+          <!--
+            The section below for shaders is ignored when using
+            DYNAMIC_TEXTURE
+          -->
+
+          <!-- shader program -->
+          <shader language="metal">
+            <vertex>../waves/materials/waves_vs.metal</vertex>
+            <fragment>../waves/materials/waves_fs.metal</fragment>
+          </shader>
+
+          <!-- vertex shader params -->
+          <param>
+            <shader>vertex</shader>
+            <name>world_matrix</name>
+          </param>
+          <param>
+            <shader>vertex</shader>
+            <name>worldviewproj_matrix</name>
+          </param>
+          <param>
+            <shader>vertex</shader>
+            <name>camera_position</name>
+          </param>
+          <param>
+            <shader>vertex</shader>
+            <name>rescale</name>
+            <value>0.5</value>
+            <type>float</type>
+          </param>
+          <param>
+            <shader>vertex</shader>
+            <name>bumpScale</name>
+            <value>128 128</value>
+            <type>float_array</type>
+          </param>
+          <param>
+            <shader>vertex</shader>
+            <name>bumpSpeed</name>
+            <value>0.01 0.01</value>
+            <type>float_array</type>
+          </param>
+          <param>
+            <shader>vertex</shader>
+            <name>t</name>
+            <value>TIME</value>
+          </param>
+
+          <!-- pixel shader params -->
+          <param>
+            <shader>fragment</shader>
+            <name>deepColor</name>
+            <value>0.0 0.05 0.2 1.0</value>
+            <type>float_array</type>
+          </param>
+          <param>
+            <shader>fragment</shader>
+            <name>shallowColor</name>
+            <value>0.0 0.1 0.3 1.0</value>
+            <type>float_array</type>
+          </param>
+          <param>
+            <shader>fragment</shader>
+            <name>fresnelPower</name>
+            <value>5.0</value>
+            <type>float</type>
+          </param>
+          <param>
+            <shader>fragment</shader>
+            <name>hdrMultiplier</name>
+            <value>0.4</value>
+            <type>float</type>
+          </param>
+          <param>
+            <shader>fragment</shader>
+            <name>bumpMap</name>
+            <value>../waves/materials/wave_normals.dds</value>
+            <type>texture</type>
+            <arg>0</arg>
+          </param>
+          <param>
+            <shader>fragment</shader>
+            <name>cubeMap</name>
+            <value>../waves/materials/skybox_lowres.dds</value>
+            <type>texture_cube</type>
+            <arg>1</arg>
+          </param>
+
+        </plugin>
+      </visual>
+    </link>
+  </model>
+</sdf>

@@ -143,6 +143,18 @@ void Wavefield::SetParameters(std::shared_ptr<WaveParameters> params)
   impl_->ocean_tile_.reset(new physics::OceanTile(
       impl_->params_, false));
   impl_->ocean_tile_->SetWindVelocity(u, v);
+
+  // Parameters for the 'jonswap_fft' algorithm - no-ops for every other
+  // algorithm, since the OceanTile's Hs/Tp/gamma/direction setters only
+  // reach a live JonswapFFTWaveSimulation.
+  impl_->ocean_tile_->SetHs(impl_->params_->Hs());
+  impl_->ocean_tile_->SetTp(impl_->params_->Tp());
+  impl_->ocean_tile_->SetGamma(impl_->params_->Gamma());
+  impl_->ocean_tile_->SetWaveDirectionDeg(
+      impl_->params_->WaveDirectionDeg());
+  impl_->ocean_tile_->SetDirectionalSpread(
+      impl_->params_->DirectionalSpread());
+
   impl_->ocean_tile_->Create();
 
   // Point Locator

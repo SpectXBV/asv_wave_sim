@@ -32,6 +32,7 @@
 
 #include "gz/common/SubMeshWithTangents.hh"
 #include "gz/waves/Geometry.hh"
+#include "gz/waves/JonswapFFTWaveSimulation.hh"
 #include "gz/waves/LinearRandomFFTWaveSimulation.hh"
 #include "gz/waves/LinearRandomWaveSimulation.hh"
 #include "gz/waves/LinearRegularWaveSimulation.hh"
@@ -75,6 +76,13 @@ class OceanTilePrivate
   void SetWindVelocity(double ux, double uy);
   void SetSteepness(double value);
 
+  // 'jonswap_fft' algorithm parameters - no-ops for other algorithms.
+  void SetHs(double value);
+  void SetTp(double value);
+  void SetGamma(double value);
+  void SetWaveDirectionDeg(double value);
+  void SetDirectionalSpread(double value);
+
   bool                        has_visuals_;
   /// \brief FFT size (nx, ny must be a power of 2)
   Index                       nx_;
@@ -100,6 +108,12 @@ class OceanTilePrivate
   std::string                 below_ocean_mesh_name_ = "BelowOceanTileMesh";
 
   std::unique_ptr<IWaveSimulation> wave_sim_;
+
+  /// \brief Non-owning alias of wave_sim_ when it holds a
+  ///        JonswapFFTWaveSimulation, used to reach the Hs/Tp/gamma/
+  ///        direction setters that are not part of the IWaveSimulation
+  ///        interface. Null for every other algorithm.
+  JonswapFFTWaveSimulation*  jonswap_wave_sim_{nullptr};
 
   Eigen::ArrayXd             heights_;  // height
   Eigen::ArrayXd             dhdx_;     // height deriv
@@ -290,6 +304,7 @@ OceanTilePrivate<Vector3>::OceanTilePrivate(
   // 1 - TrochoidIrregularWaveSimulation
   // 2 - LinearRandomFFTWaveSimulation
   // 3 - LinearRandomWaveSimulation
+  // 4 - JonswapFFTWaveSimulation
 
   Index wave_sim_type = -1;
   if (params->Algorithm() == "sinusoid" ||
@@ -310,6 +325,10 @@ OceanTilePrivate<Vector3>::OceanTilePrivate(
   if (params->Algorithm() == "linear_random")
   {
     wave_sim_type = 3;
+  }
+  if (params->Algorithm() == "jonswap_fft")
+  {
+    wave_sim_type = 4;
   }
   if (wave_sim_type < 0)
   {
@@ -367,6 +386,22 @@ OceanTilePrivate<Vector3>::OceanTilePrivate(
       wave_sim_ = std::move(wave_sim);
       break;
     }
+    case 4:
+    {
+      auto wave_sim = std::make_unique<JonswapFFTWaveSimulation>(
+          lx_, ly_, nx_, ny_);
+
+      wave_sim->SetLambda(params->Steepness());
+      wave_sim->SetHs(params->Hs());
+      wave_sim->SetTp(params->Tp());
+      wave_sim->SetGamma(params->Gamma());
+      wave_sim->SetWaveDirectionDeg(params->WaveDirectionDeg());
+      wave_sim->SetDirectionalSpread(params->DirectionalSpread());
+
+      jonswap_wave_sim_ = wave_sim.get();
+      wave_sim_ = std::move(wave_sim);
+      break;
+    }
     default:
       break;
   }
@@ -384,6 +419,56 @@ template <typename Vector3>
 void OceanTilePrivate<Vector3>::SetSteepness(double value)
 {
   wave_sim_->SetSteepness(value);
+}
+
+//////////////////////////////////////////////////
+template <typename Vector3>
+void OceanTilePrivate<Vector3>::SetHs(double value)
+{
+  if (jonswap_wave_sim_ != nullptr)
+  {
+    jonswap_wave_sim_->SetHs(value);
+  }
+}
+
+//////////////////////////////////////////////////
+template <typename Vector3>
+void OceanTilePrivate<Vector3>::SetTp(double value)
+{
+  if (jonswap_wave_sim_ != nullptr)
+  {
+    jonswap_wave_sim_->SetTp(value);
+  }
+}
+
+//////////////////////////////////////////////////
+template <typename Vector3>
+void OceanTilePrivate<Vector3>::SetGamma(double value)
+{
+  if (jonswap_wave_sim_ != nullptr)
+  {
+    jonswap_wave_sim_->SetGamma(value);
+  }
+}
+
+//////////////////////////////////////////////////
+template <typename Vector3>
+void OceanTilePrivate<Vector3>::SetWaveDirectionDeg(double value)
+{
+  if (jonswap_wave_sim_ != nullptr)
+  {
+    jonswap_wave_sim_->SetWaveDirectionDeg(value);
+  }
+}
+
+//////////////////////////////////////////////////
+template <typename Vector3>
+void OceanTilePrivate<Vector3>::SetDirectionalSpread(double value)
+{
+  if (jonswap_wave_sim_ != nullptr)
+  {
+    jonswap_wave_sim_->SetDirectionalSpread(value);
+  }
 }
 
 //////////////////////////////////////////////////
@@ -1038,6 +1123,41 @@ void OceanTileT<gz::math::Vector3d>::SetSteepness(double value)
 
 //////////////////////////////////////////////////
 template <>
+void OceanTileT<gz::math::Vector3d>::SetHs(double value)
+{
+  impl_->SetHs(value);
+}
+
+//////////////////////////////////////////////////
+template <>
+void OceanTileT<gz::math::Vector3d>::SetTp(double value)
+{
+  impl_->SetTp(value);
+}
+
+//////////////////////////////////////////////////
+template <>
+void OceanTileT<gz::math::Vector3d>::SetGamma(double value)
+{
+  impl_->SetGamma(value);
+}
+
+//////////////////////////////////////////////////
+template <>
+void OceanTileT<gz::math::Vector3d>::SetWaveDirectionDeg(double value)
+{
+  impl_->SetWaveDirectionDeg(value);
+}
+
+//////////////////////////////////////////////////
+template <>
+void OceanTileT<gz::math::Vector3d>::SetDirectionalSpread(double value)
+{
+  impl_->SetDirectionalSpread(value);
+}
+
+//////////////////////////////////////////////////
+template <>
 std::array<double, 2> OceanTileT<gz::math::Vector3d>::TileSize() const
 {
   return {impl_->lx_, impl_->ly_};
@@ -1163,6 +1283,41 @@ template <>
 void OceanTileT<cgal::Point3>::SetSteepness(double value)
 {
   impl_->SetSteepness(value);
+}
+
+//////////////////////////////////////////////////
+template <>
+void OceanTileT<cgal::Point3>::SetHs(double value)
+{
+  impl_->SetHs(value);
+}
+
+//////////////////////////////////////////////////
+template <>
+void OceanTileT<cgal::Point3>::SetTp(double value)
+{
+  impl_->SetTp(value);
+}
+
+//////////////////////////////////////////////////
+template <>
+void OceanTileT<cgal::Point3>::SetGamma(double value)
+{
+  impl_->SetGamma(value);
+}
+
+//////////////////////////////////////////////////
+template <>
+void OceanTileT<cgal::Point3>::SetWaveDirectionDeg(double value)
+{
+  impl_->SetWaveDirectionDeg(value);
+}
+
+//////////////////////////////////////////////////
+template <>
+void OceanTileT<cgal::Point3>::SetDirectionalSpread(double value)
+{
+  impl_->SetDirectionalSpread(value);
 }
 
 //////////////////////////////////////////////////

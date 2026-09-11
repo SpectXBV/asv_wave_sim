@@ -12,6 +12,8 @@ set(sources
   Convert.cc
   Geometry.cc
   Grid.cc
+  JonswapFFTWaveSimulation.cc
+  JonswapWaveSpectrum.cc
   MeshTools.cc
   OceanTile.cc
   PhysicalConstants.cc
@@ -39,6 +41,7 @@ set(gtest_sources
   EigenFFTW_TEST.cc
   Geometry_TEST.cc
   Grid_TEST.cc
+  JonswapWaveSpectrum_TEST.cc
   LinearRegularWaveSimulation_TEST.cc
   LinearRandomFFTWaveSimulation_TEST.cc
   MeshTools_TEST.cc
