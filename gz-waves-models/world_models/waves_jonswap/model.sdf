@@ -36,7 +36,7 @@
         <steepness>2</steepness>
       </wave>
     </plugin>
-
+   
     <link name="base_link">
       <visual name="visual">
         <geometry>
@@ -176,5 +176,11 @@
         </plugin>
       </visual>
     </link>
+     <include>
+      <pose>0 0 0 0 0 0</pose>
+      <uri>model://barrage_buoy</uri>
+      <name>buoy0</name>
+    </include>
+
   </model>
 </sdf>
