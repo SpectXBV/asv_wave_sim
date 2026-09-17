@@ -26,17 +26,17 @@
       <wave>
         <!-- `jonswap_fft` wave parameters -->
         <algorithm>jonswap_fft</algorithm>
-        <tile_size>128</tile_size>
+        <tile_size>256</tile_size>
         <cell_count>64</cell_count>
-        <hs>22.0</hs>
-        <tp>16.0</tp>
+        <hs>6.0</hs>
+        <tp>6.0</tp>
         <gamma>3.3</gamma>
-        <wave_direction_deg>270</wave_direction_deg>
+        <wave_direction_deg>90</wave_direction_deg>
         <direction_spread>5.0</direction_spread>
         <steepness>2</steepness>
       </wave>
     </plugin>
-   
+
     <link name="base_link">
       <visual name="visual">
         <geometry>
@@ -75,12 +75,12 @@
             <!-- `jonswap_fft` wave parameters - kept in sync with the
                  WavesModel block above by generate_model_sdf.sh -->
             <algorithm>jonswap_fft</algorithm>
-            <tile_size>128</tile_size>
+            <tile_size>256</tile_size>
             <cell_count>64</cell_count>
-            <hs>22.0</hs>
-            <tp>16.0</tp>
+            <hs>6.0</hs>
+            <tp>6.0</tp>
             <gamma>3.3</gamma>
-            <wave_direction_deg>270</wave_direction_deg>
+            <wave_direction_deg>90</wave_direction_deg>
             <direction_spread>5.0</direction_spread>
             <steepness>2</steepness>
           </wave>
@@ -176,11 +176,5 @@
         </plugin>
       </visual>
     </link>
-     <include>
-      <pose>0 0 0 0 0 0</pose>
-      <uri>model://barrage_buoy</uri>
-      <name>buoy0</name>
-    </include>
-
   </model>
 </sdf>
